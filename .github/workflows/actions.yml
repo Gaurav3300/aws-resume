@@ -8,12 +8,24 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to EC2 on master branch push
+    name: Deploy to EC2 on main branch push
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout the files
         uses: actions/checkout@v2
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
 
       - name: Deploy to Server 1
         uses: easingthemes/ssh-deploy@main
@@ -31,8 +43,10 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             sudo apt-get -y update
-            sudo apt-get install -y apache2
-            sudo systemctl start apache2
-            sudo systemctl enable apache2
+            sudo apt-get install -y nodejs npm
+            sudo npm cache clean -f
+            sudo npm install -g n
+            sudo n 20
+            sudo systemctl restart apache2
             cd home
             sudo mv * /var/www/html
