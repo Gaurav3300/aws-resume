@@ -12,8 +12,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout the files
-        uses: actions/checkout@v2
+      - name: Checkout the repository
+        uses: actions/checkout@v3
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v3
@@ -27,16 +27,16 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Deploy to Server 1
-        uses: easingthemes/ssh-deploy@main
+      - name: Deploy to Server 1 using SSH
+        uses: easingthemes/ssh-deploy@v2.1.5
         env:
           SSH_PRIVATE_KEY: ${{ secrets.EC2_SSH_KEY }}
           REMOTE_HOST: ${{ secrets.HOST_DNS }}
           REMOTE_USER: ${{ secrets.USERNAME }}
           TARGET: ${{ secrets.TARGET_DIR }}
 
-      - name: Executing remote ssh commands using ssh key
-        uses: appleboy/ssh-action@master
+      - name: Executing remote SSH commands using SSH key
+        uses: appleboy/ssh-action@v0.1.10
         with:
           host: ${{ secrets.HOST_DNS }}
           username: ${{ secrets.USERNAME }}
@@ -48,5 +48,5 @@ jobs:
             sudo npm install -g n
             sudo n 20
             sudo systemctl restart apache2
-            cd home
+            cd /home/${{ secrets.USERNAME }}
             sudo mv * /var/www/html
